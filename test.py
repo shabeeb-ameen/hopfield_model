@@ -1,10 +1,22 @@
 from classes import*
+p1=np.array([1,1,-1,-1,-1,1,1])
+p2=np.array([1,1,-1,-1,-1,1,1])
+p3=np.array([1,1,-1,-1,-1,1,1])
+p4=np.array([1,1,1,-1,1,1,1])
 
 
-mem1=Memory_State.from_bin([0,1,1,1,0,1,0,0])
-mem1.plotter()
+p5=np.array([1,1,-1,-1,-1,1,1])
+p6=np.array([1,1,1,-1,1,1,1])
+p7=np.array([1,1,-1,1,-1,1,1])
+p=np.concatenate((row_1,row_2,row_3,row_4,row_5,row_6,row_7), axis=0)
 
-heb=Weight.Hebbian([mem1])
+
+
+
+person=Memory_State.from_bin(p)
+person.plotter(7)
+
+heb=Weight.Hebbian([person])
 print(heb.weight_matrix)
 
 mem_test=Memory_State.from_bin([1,1,1,1,1,1,0,1])
@@ -12,8 +24,9 @@ mem_test=Memory_State.from_bin([1,1,1,1,1,1,0,1])
 mem_test.plotter()
 
 
-mem_test.Async_Update(heb)
+changes=mem_test.Async_Update(heb)
 print(mem_test.neuron_states)
+print(changes)
 mem_test.plotter()
 #n1=Neuron(0)
 

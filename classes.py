@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import copy
 
 
 ### IMPORTANT: write dunder methods to establish equality of memory states. Cascades from equality of neuron objects.
@@ -42,24 +43,36 @@ class Memory_State:
     ## Function: Asynchronous update:
     ## This function random-cycles through the neurons in the memory state.
     ## Each neuron is updated based on the input weight matrix.
+    ## The function keeps track of how many neuron states were flipped throughout the update.
+    ## If none were flipped, we have converged to a stable memory state.
 
     def Async_Update(self, weight):
+        changes=0
         for i in np.random.permutation(self.word_length):
         #for i in range(self.word_length):
+            old_state=self.neuron_states[i]
             new_state=np.inner(weight.weight_matrix[i],self.neuron_states)
-            print(new_state)
             self.neuron_list[i]=Neuron(new_state)
             self.neuron_states[i]=self.neuron_list[i].state
-        return
+            if self.neuron_states[i] != old_state: changes+=1
+        return changes
     
     ## This function randomly scrambles the memory state to a specified Hamming distance.
-    def Hamming_Scrambler(dist):
-        #update self.neuron_list AND corresponding self.neuron_state  elements       
-        pass#return
+    def Hamming_Scrambler(self, dist):
+        scram=np.random.permutation(self.word_length)
+        for i in range(dist):
+            self.neuron_list[scram[i]].flip_state()
+            self.neuron_states[scram[i]]*=-1
+        return
 
-    def plotter(self):
-        plt.imshow([self.neuron_states,self.neuron_states],interpolation="none")
-        plt.show()
+    def plotter(self, cols=None):
+        if cols==None:
+            plt.imshow([self.neuron_states,self.neuron_states],interpolation="none")
+            plt.show()
+        else:
+            plt.imshow(np.split(np.array(self.neuron_states),cols),interpolation="none")
+            plt.show()
+
         return
         
 
@@ -100,9 +113,10 @@ class Weight:
     def Hebbian(cls,memory_states_list):
         N=len(memory_states_list[0].neuron_list)
         weight_matrix=np.zeros((N,N))
-        for i in range (1,N):
+        #memory_states_list=copy.deepcopy(memlist)
+        for i in range (0,N):
             for j in range (i+1,N):
-                weight_matrix[i][j]=np.sum([mem.neuron_states[i]*mem.neuron_states[j] for mem in memory_states_list])
+                weight_matrix[i][j]=np.sum([mem.neuron_states[i]*mem.neuron_states[j] for mem in memory_states_list])/N
                 weight_matrix[j][i]=weight_matrix[i][j]
 
         return cls(weight_matrix)
@@ -114,3 +128,6 @@ class Weight:
         for i in range(N):
             weight_matrix[i][i]=0
         return cls(weight_matrix)
+
+
+
